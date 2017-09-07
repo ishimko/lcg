@@ -1,8 +1,9 @@
+from collections import namedtuple
 from statistics import mean, variance
 
 from lcg import get_random_vector
-from lcg_parameters import LcgParameters
 
+LcgParameters = namedtuple('LcgParameters', ['initial', 'multiplyer', 'base'])
 
 def minmax(data):
     iterator = iter(data)
