@@ -1,3 +1,5 @@
+TEST_LENGTH = 10**6
+
 def minmax(data):
     iterator = iter(data)
     try:
@@ -39,12 +41,9 @@ def last_element(iterable):
 
 
 def period(generator):
-    initial = 1
-    length = 10**6
-
-    last = last_element(generator(length, initial))
+    last = last_element(generator(TEST_LENGTH))
     start = end = None
-    for i, x in enumerate(generator(length, initial)):
+    for i, x in enumerate(generator(TEST_LENGTH)):
         if x == last:
             if not start:
                 start = i
@@ -55,3 +54,11 @@ def period(generator):
         return None
     else:
         return end - start
+
+def aperiodic_interval(generator, period):
+    sequence = list(generator(TEST_LENGTH))
+    for i in range(TEST_LENGTH):
+        if i + period < TEST_LENGTH:
+            if sequence[i] == sequence[i + period]:
+                return i + period
+    return None
