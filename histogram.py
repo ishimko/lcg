@@ -11,5 +11,4 @@ def draw_histogram(numbers):
         edgecolor='black',
         linewidth=1
     )
-    print('frequencies:\n', '\n'.join(('{} : {}'.format(*x) for x in enumerate(frequencies, start=1))))
     plt.show()
