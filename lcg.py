@@ -42,18 +42,15 @@ def last_element(iterable):
 
 def period(generator):
     last = last_element(generator(TEST_LENGTH))
-    start = end = None
+    start = None
     for i, x in enumerate(generator(TEST_LENGTH)):
         if x == last:
             if not start:
                 start = i
             else:
-                end = i
-                break
-    if not (start and end):
-        return None
-    else:
-        return end - start
+                return i - start
+    return None
+
 
 def aperiodic_interval(generator, period):
     sequence = list(generator(TEST_LENGTH))
