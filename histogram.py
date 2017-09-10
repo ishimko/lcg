@@ -4,7 +4,7 @@ RANGES_COUNT = 20
 
 def draw_histogram(numbers):
     weights = [1/len(numbers)]*len(numbers)
-    frequencies, _, _ = plt.hist(
+    plt.hist(
         numbers,
         bins=RANGES_COUNT,
         weights=weights,

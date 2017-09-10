@@ -18,8 +18,7 @@ def uniform_ratio(numbers):
     length = len(numbers)
     if length % 2:
         length = length - 1
-    pairs = ((numbers[i], numbers[i+1]) for i in range(0, length, 2))
-    K = sum(1 for x1, x2 in pairs if x1**2 + x2**2 < 1)
+    K = sum(x1**2 + x2**2 < 1 for x1, x2 in zip(numbers[::2], numbers[1::2]))
     return 2*K / len(numbers)
 
 
