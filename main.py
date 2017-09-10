@@ -36,6 +36,7 @@ def main():
     result = list(lcg.random_vector(100000, params))
     print_result('mean', stat.mean(result), reference_value=1/2, reference_value_representation='1/2')
     print_result('variance', stat.variance(result), reference_value=1/12, reference_value_representation='1/12')
+    print_result('standart deviation', stat.stdev(result))
     print_result('2K/N', lcg.uniform_ratio(result), reference_value=pi/4, reference_value_representation='pi/4')
     period = lcg.period(lambda length: lcg.random_vector(length, params))
     print_result('period', period)
