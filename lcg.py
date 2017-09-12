@@ -1,5 +1,6 @@
 TEST_LENGTH = 10**6
 
+
 def minmax(data):
     iterator = iter(data)
     try:
@@ -15,11 +16,8 @@ def minmax(data):
 
 
 def uniform_ratio(numbers):
-    length = len(numbers)
-    if length % 2:
-        length = length - 1
-    K = sum(x1**2 + x2**2 < 1 for x1, x2 in zip(numbers[::2], numbers[1::2]))
-    return 2*K / len(numbers)
+    k = sum(x1**2 + x2**2 < 1 for x1, x2 in zip(numbers[::2], numbers[1::2]))
+    return 2*k / len(numbers)
 
 
 def random_vector(length, lgc_parameters):

@@ -12,12 +12,13 @@ def print_result(name, actual_result, reference_value_representation='', referen
     if actual_result is not None:
         result = '{}: {}'.format(name, actual_result)
         if reference_value:
-            result += ' (reference value = {}; delta: {})'.format(reference_value_representation + ' = ' + str(reference_value) 
+            result += ' (reference value = {}; delta: {})'.format(
+                reference_value_representation + ' = ' + str(reference_value)
                 if reference_value_representation
                 else
-                    reference_value
+                reference_value
                 , abs(reference_value - actual_result)
-            )
+                )
     else:
         result = 'Can not find {}'.format(name)
     print(result)
@@ -34,14 +35,15 @@ def read_lcg_parameters():
 def main():
     params = read_lcg_parameters()
     result = list(lcg.random_vector(100000, params))
-    print_result('mean', stat.mean(result), reference_value=1/2, reference_value_representation='1/2')
-    print_result('variance', stat.variance(result), reference_value=1/12, reference_value_representation='1/12')
+    print_result('mean', stat.mean(result), reference_value=1 / 2, reference_value_representation='1/2')
+    print_result('variance', stat.variance(result), reference_value=1 / 12, reference_value_representation='1/12')
     print_result('standart deviation', stat.stdev(result))
-    print_result('2K/N', lcg.uniform_ratio(result), reference_value=pi/4, reference_value_representation='pi/4')
+    print_result('2K/N', lcg.uniform_ratio(result), reference_value=pi / 4, reference_value_representation='pi/4')
     period = lcg.period(lambda length: lcg.random_vector(length, params))
     print_result('period', period)
     if period:
-        print_result('aperiodic interval', lcg.aperiodic_interval(lambda length: lcg.random_vector(length, params), period))
+        print_result('aperiodic interval',
+                     lcg.aperiodic_interval(lambda length: lcg.random_vector(length, params), period))
     draw_histogram(result)
 
 
