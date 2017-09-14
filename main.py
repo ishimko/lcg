@@ -25,10 +25,20 @@ def print_result(name, actual_result, reference_value_representation='', referen
 
 def read_lcg_parameters():
     return LcgParameters(
-        base=int(input("m: ")),
-        initial=int(input("R0: ")),
-        multiplyer=int(input("a: "))
+        base=read_positive("m"),
+        initial=read_positive("R0"),
+        multiplyer=read_positive("a")
     )
+
+
+def read_positive(name):
+    result = None
+    while (result is None) or (result <= 0):
+        try:
+            result = int(input('{}: '.format(name)))
+        except ValueError:
+            print('Invalid input, positive integer is required')
+    return result
 
 
 def main():
