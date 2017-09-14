@@ -3,6 +3,7 @@ import statistics as stat
 from math import pi
 
 import lcg
+import distributions
 from histogram import draw_histogram
 
 LcgParameters = namedtuple('LcgParameters', ['initial', 'multiplyer', 'base'])
@@ -33,17 +34,44 @@ def read_lcg_parameters():
 
 
 def main():
-    params = read_lcg_parameters()
-    result = list(lcg.random_vector(100000, params))
+    params = LcgParameters(
+        base=1046527,
+        initial=65537,
+        multiplyer=32771
+    )
+    # uniform_params = distributions.UniformParameters(
+    #     a=10,
+    #     b=20
+    # )
+    # gaussian_params = distributions.GaussianParameters(
+    #     mean=0,
+    #     scale=1
+    # )
+    # exponential_params = distributions.ExponentialParameters(
+    #     rate=1
+    # )
+    # gamma_params = distributions.GammaParameters(
+    #     shape=3,
+    #     scale=2
+    # )
+    # triangular_params = distributions.TriangularParameters(
+    #     a=10,
+    #     b=20
+    # )
+    simpson_params = distributions.SimpsonParameters(
+        a=10,
+        b=20
+    )
+
+#   result = list(distributions.uniform_distribution(100000, params, uniform_params))
+#   result = list(distributions.gaussian_distribution(100000, params, gaussian_params))
+#   result = list(distributions.exponential_distribution(100000, params, exponential_params))
+#   result = list(distributions.gamma_distribution(100000, params, gamma_params))
+#   result = list(distributions.triangular_distribution(100000, params, triangular_params))
+    result = list(distributions.simpson_distribution(100000, params, simpson_params))
     print_result('mean', stat.mean(result), reference_value=1 / 2, reference_value_representation='1/2')
     print_result('variance', stat.variance(result), reference_value=1 / 12, reference_value_representation='1/12')
     print_result('standart deviation', stat.stdev(result))
-    print_result('2K/N', lcg.uniform_ratio(result), reference_value=pi / 4, reference_value_representation='pi/4')
-    period = lcg.period(lambda length: lcg.random_vector(length, params))
-    print_result('period', period)
-    if period:
-        print_result('aperiodic interval',
-                     lcg.aperiodic_interval(lambda length: lcg.random_vector(length, params), period))
     draw_histogram(result)
 
 
