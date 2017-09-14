@@ -11,6 +11,7 @@ GammaParameters = namedtuple('GammaParameters', ['shape', 'scale'])
 TriangularParameters = namedtuple('TriangularParameters', ['a', 'b'])
 SimpsonParameters = namedtuple('SimpsonParameters', ['a', 'b'])
 
+Distribution = namedtuple('Distribution', ['name', 'generator', 'parameters_reader'])
 
 def uniform_distribution(length, lgc_parameters, uniform_params):
     vector = lcg.random_vector(length, lgc_parameters)
@@ -51,3 +52,12 @@ def simpson_distribution(length, lgc_parameters, simpson_params):
     vector_b = list(uniform_distribution(length, lgc_parameters, uniform_params))
     for i, a in enumerate(vector_a):
         yield a + vector_b[i]
+
+
+class Distributions:
+    uniform = Distribution('Uniform', uniform_distribution, lambda: UniformParameters(a=10, b=20))
+    gaussian = Distribution('Gaussian', gaussian_distribution, lambda: GaussianParameters(mean=0, scale=1))
+    exponential = Distribution('Exponential', exponential_distribution, lambda: ExponentialParameters(rate=1))
+    gamma = Distribution('Gamma', gamma_distribution, lambda: GammaParameters(shape=3, scale=2))
+    triangular = Distribution('Triangular', triangular_distribution, lambda: TriangularParameters(a=10, b=20))
+    simpson = Distribution('Simpson', simpson_distribution, lambda: SimpsonParameters(a=10, b=20))
