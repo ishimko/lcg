@@ -22,7 +22,7 @@ def uniform_ratio(numbers):
 
 def random_vector(length, lgc_parameters):
     x = lgc_parameters.initial
-    for i in range(length):
+    for _ in range(length):
         x = (x * lgc_parameters.multiplyer) % lgc_parameters.base
         yield x/lgc_parameters.base
 
@@ -49,10 +49,10 @@ def period(generator):
     return None
 
 
-def aperiodic_interval(generator, period):
+def aperiodic_interval(generator, found_period):
     sequence = list(generator(TEST_LENGTH))
     for i in range(TEST_LENGTH):
-        if i + period < TEST_LENGTH:
-            if sequence[i] == sequence[i + period]:
-                return i + period
+        if i + found_period < TEST_LENGTH:
+            if sequence[i] == sequence[i + found_period]:
+                return i + found_period
     return None

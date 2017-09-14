@@ -1,63 +1,131 @@
 from math import sqrt, log
 from collections import namedtuple
 import lcg
-
-GAUSSIAN_N = 6
-
-UniformParameters = namedtuple('UniformParameters', ['a', 'b'])
-GaussianParameters = namedtuple('GaussianParameters', ['mean', 'scale'])
-ExponentialParameters = namedtuple('ExponentialParameters', ['rate'])
-GammaParameters = namedtuple('GammaParameters', ['shape', 'scale'])
-TriangularParameters = namedtuple('TriangularParameters', ['a', 'b'])
-SimpsonParameters = namedtuple('SimpsonParameters', ['a', 'b'])
-
-Distribution = namedtuple('Distribution', ['name', 'generator', 'parameters_reader'])
-
-def uniform_distribution(length, lgc_parameters, uniform_params):
-    vector = lcg.random_vector(length, lgc_parameters)
-    for x in vector:
-        yield uniform_params.a + (uniform_params.b - uniform_params.a) * x
+from reader import read_float, read_positive_float, read_positive_int
 
 
-def gaussian_distribution(length, lgc_parameters, gaussian_params):
-    vector = list(lcg.random_vector(length * GAUSSIAN_N, lgc_parameters))
-    for x in range(0, len(vector), GAUSSIAN_N):
-        yield gaussian_params.mean + gaussian_params.scale * sqrt(2) * sum((vector[x+i] - GAUSSIAN_N / 2) for i in range(0, GAUSSIAN_N))
+class UniformDistribution:
+    UniformParameters = namedtuple('UniformParameters', ['a', 'b'])
+
+    def generate(self, length, lgc_parameters, parameters=None):
+        if parameters is None:
+            parameters = self._read_params()
+        vector = lcg.random_vector(length, lgc_parameters)
+        for x in vector:
+            yield parameters.a + (parameters.b - parameters.a) * x
+
+    def _read_params(self):
+        a = read_float('a')
+        b = read_float('b', lambda x: x > a)
+        return UniformDistribution.UniformParameters(a, b)
+
+    @property
+    def name(self):
+        return 'uniform'
 
 
-def exponential_distribution(length, lgc_parameters, exponential_params):
-    vector = lcg.random_vector(length, lgc_parameters)
-    for x in vector:
-        yield - (1 / exponential_params.rate) * log(x)
+class GaussianDistribution:
+    GaussianParameters = namedtuple('GaussianParameters', ['mean', 'scale'])
+    N = 6
+
+    def generate(self, length, lgc_parameters, parameters=None):
+        if parameters is None:
+            parameters = self._read_params()
+        vector = list(lcg.random_vector(length * GaussianDistribution.N, lgc_parameters))
+        for x in range(0, len(vector), GaussianDistribution.N):
+            sub_vector = vector[x:x + GaussianDistribution.N]
+            yield parameters.mean + parameters.scale * sqrt(12 / GaussianDistribution.N)*(sum(sub_vector) - GaussianDistribution.N / 2)
+
+    def _read_params(self):
+        mean = read_float('mean')
+        scale = read_positive_float('scale')
+        return GaussianDistribution.GaussianParameters(mean, scale)
+
+    @property
+    def name(self):
+        return 'gaussian'
 
 
-def gamma_distribution(length, lgc_parameters, gamma_params):
-    vector = list(lcg.random_vector(length * gamma_params.shape, lgc_parameters))
-    for x in range(0, len(vector), gamma_params.shape):
-        yield - (1 / gamma_params.scale) * sum(log(vector[x+i]) for i in range(0, gamma_params.shape))
+class ExponentialDistribution:
+    ExponentialParameters = namedtuple('ExponentialParameters', ['rate'])
+
+    def generate(self, length, lgc_parameters, parameters=None):
+        if parameters is None:
+            parameters = self._read_params()
+        vector = lcg.random_vector(length, lgc_parameters)
+        for x in vector:
+            yield - (1 / parameters.rate) * log(x)
+
+    def _read_params(self):
+        rate = read_positive_float('rate')
+        return ExponentialDistribution.ExponentialParameters(rate)
+
+    @property
+    def name(self):
+        return 'exponential'
 
 
-def triangular_distribution(length, lgc_parameters, triangular_params):
-    vector = list(lcg.random_vector(length * 2, lgc_parameters))
-    for x in range(0, len(vector), 2):
-        yield triangular_params.a + (triangular_params.b - triangular_params.a) * max(vector[x], vector[x+1])
+class GammaDistribution:
+    GammaParameters = namedtuple('GammaParameters', ['shape', 'scale'])
+
+    def generate(self, length, lgc_parameters, gamma_params=None):
+        if gamma_params is None:
+            gamma_params = self._read_params()
+        vector = list(lcg.random_vector(length * gamma_params.shape, lgc_parameters))
+        for x in range(0, len(vector), gamma_params.shape):
+            yield - (1 / gamma_params.scale) * sum(log(vector[x+i]) for i in range(0, gamma_params.shape))
+
+    def _read_params(self):
+        shape = read_positive_int('shape')
+        scale = read_positive_float('scale')
+        return GammaDistribution.GammaParameters(shape, scale)
+
+    @property
+    def name(self):
+        return 'gamma'
 
 
-def simpson_distribution(length, lgc_parameters, simpson_params):
-    uniform_params = UniformParameters(
-        a=simpson_params.a / 2,
-        b=simpson_params.b / 2
-    )
-    vector_a = list(uniform_distribution(length, lgc_parameters, uniform_params))
-    vector_b = list(uniform_distribution(length, lgc_parameters, uniform_params))
-    for i, a in enumerate(vector_a):
-        yield a + vector_b[i]
+class TriangularDistribution:
+    TriangularParameters = namedtuple('TriangularParameters', ['a', 'b'])
+
+    def generate(self, length, lgc_parameters, triangular_params=None):
+        if triangular_params is None:
+            triangular_params = self._read_params()
+        vector = list(lcg.random_vector(length * 2, lgc_parameters))
+        for x in range(0, len(vector), 2):
+            yield triangular_params.a + (triangular_params.b - triangular_params.a) * max(vector[x], vector[x+1])
+
+    def _read_params(self):
+        a = read_float('a')
+        b = read_float('b', lambda x: x > a)
+        return TriangularDistribution.TriangularParameters(a, b)
+
+    @property
+    def name(self):
+        return 'triangle'
 
 
-class Distributions:
-    uniform = Distribution('Uniform', uniform_distribution, lambda: UniformParameters(a=10, b=20))
-    gaussian = Distribution('Gaussian', gaussian_distribution, lambda: GaussianParameters(mean=0, scale=1))
-    exponential = Distribution('Exponential', exponential_distribution, lambda: ExponentialParameters(rate=1))
-    gamma = Distribution('Gamma', gamma_distribution, lambda: GammaParameters(shape=3, scale=2))
-    triangular = Distribution('Triangular', triangular_distribution, lambda: TriangularParameters(a=10, b=20))
-    simpson = Distribution('Simpson', simpson_distribution, lambda: SimpsonParameters(a=10, b=20))
+class SimpsonDistribution:
+    SimpsonParameters = namedtuple('SimpsonParameters', ['a', 'b'])
+
+    def generate(self, length, lgc_parameters, simpson_params=None):
+        if simpson_params is None:
+            simpson_params = self._read_params()
+        uniform_params = UniformDistribution.UniformParameters(
+            a=simpson_params.a / 2,
+            b=simpson_params.b / 2
+        )
+        uniform_distribution = UniformDistribution()
+        vector_a = list(uniform_distribution.generate(length, lgc_parameters, uniform_params))
+        vector_b = list(uniform_distribution.generate(length, lgc_parameters, uniform_params))
+        for i, a in enumerate(vector_a):
+            yield a + vector_b[i]
+
+    def _read_params(self):
+        a = read_float('a')
+        b = read_float('b', lambda x: x > a)
+        return SimpsonDistribution.SimpsonParameters(a, b)
+
+    @property
+    def name(self):
+        return 'simpson'

@@ -7,3 +7,17 @@ m: 1000000
 R0: 65537
 a: 32771
 P = 50000
+
+
+Uniform 
+    a=10, b=20
+Gaussian 
+    mean=0, scale=1
+Exponential
+    rate=1
+Gamma
+    shape=3, scale=2
+Triangular
+    a=10, b=20
+Simpson
+    a=10, b=20

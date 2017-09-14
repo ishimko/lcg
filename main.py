@@ -4,13 +4,29 @@ from math import pi
 import sys
 
 import lcg
-import distributions
-from distributions import Distributions
+from distributions import ExponentialDistribution, GammaDistribution, GaussianDistribution, UniformDistribution, TriangularDistribution, SimpsonDistribution
 from histogram import draw_histogram
+from reader import read_positive_int
 
 
 LcgParameters = namedtuple('LcgParameters', ['initial', 'multiplyer', 'base'])
 
+DISTRIBUTIONS_DESCRIPTION = [
+    UniformDistribution(),
+    GaussianDistribution(),
+    ExponentialDistribution(),
+    GammaDistribution(),
+    TriangularDistribution(),
+    SimpsonDistribution()
+]
+
+DEFAULT_LCG_PARAMS = LcgParameters(
+    base=1046527,
+    initial=65537,
+    multiplyer=32771
+)
+
+RANDOM_VECTOR_LENGTH = 100000
 
 def print_result(name, actual_result, reference_value_representation='', reference_value=None):
     if actual_result is not None:
@@ -30,25 +46,15 @@ def print_result(name, actual_result, reference_value_representation='', referen
 
 def read_lcg_parameters():
     return LcgParameters(
-        base=read_positive("m"),
-        initial=read_positive("R0"),
-        multiplyer=read_positive("a")
+        base=read_positive_int("m"),
+        initial=read_positive_int("R0"),
+        multiplyer=read_positive_int("a")
     )
-
-
-def read_positive(name):
-    result = None
-    while (result is None) or (result <= 0):
-        try:
-            result = int(input('{}: '.format(name)))
-        except ValueError:
-            print('Invalid input, positive integer is required')
-    return result
 
 
 def lcg_demo():
     params = read_lcg_parameters()
-    result = list(lcg.random_vector(100000, params))
+    result = list(lcg.random_vector(RANDOM_VECTOR_LENGTH, params))
     print_result('mean', stat.mean(result), reference_value=1/2, reference_value_representation='1/2')
     print_result('variance', stat.variance(result), reference_value=1/12, reference_value_representation='1/12')
     print_result('standart deviation', stat.stdev(result))
@@ -60,49 +66,35 @@ def lcg_demo():
     draw_histogram(result)
 
 
-def print_menu(distributions_description):
-    print('\t0 : exit')
-    for i, distribution in enumerate(distributions_description):
+def print_menu():
+    for i, distribution in enumerate(DISTRIBUTIONS_DESCRIPTION):
         print('\t{} : {}'.format(i+1, distribution.name))
+    print('\t0 : exit')
 
 
-def read_command(maximum):
+def read_command():
     valid = False
     while not valid:
         try:
             command = int(input('>> '))
-            valid = command >= 0 and command <= maximum
+            valid = command >= 0 and command <= len(DISTRIBUTIONS_DESCRIPTION)
         except ValueError:
             print('Invalid input')
+            print_menu()
     return command
 
 
 def distributions_demo():
-    distributions_labels = [
-        Distributions.uniform,
-        Distributions.gaussian,
-        Distributions.exponential,
-        Distributions.gamma,
-        Distributions.triangular,
-        Distributions.simpson
-    ]
-    params = LcgParameters(
-        base=1046527,
-        initial=65537,
-        multiplyer=32771
-    )
-
-    print_menu(distributions_labels)
-    command = read_command(len(distributions_labels))
+    print_menu()
+    command = read_command()
     while command != 0:
-        distribution = distributions_labels[command - 1]
-        distribution_params = distribution.parameters_reader()
-        result = list(distribution.generator(100000, params, distribution_params))
+        distribution = DISTRIBUTIONS_DESCRIPTION[command - 1]
+        result = list(distribution.generate(RANDOM_VECTOR_LENGTH, DEFAULT_LCG_PARAMS))
         print_result('mean', stat.mean(result))
         print_result('variance', stat.variance(result))
         print_result('standart deviation', stat.stdev(result))
         draw_histogram(result)
-        command = read_command(len(distributions_labels))
+        command = read_command()
 
 
 def main():
