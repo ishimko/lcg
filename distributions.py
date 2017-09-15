@@ -116,10 +116,8 @@ class SimpsonDistribution:
             b=simpson_params.b / 2
         )
         uniform_distribution = UniformDistribution()
-        vector_a = list(uniform_distribution.generate(length, lgc_parameters, uniform_params))
-        vector_b = list(uniform_distribution.generate(length, lgc_parameters, uniform_params))
-        for i, a in enumerate(vector_a):
-            yield a + vector_b[i]
+        vector = list(uniform_distribution.generate(length*2, lgc_parameters, uniform_params))
+        return map(sum, zip(vector[::2], vector[1::2]))
 
     def _read_params(self):
         a = read_float('a')
